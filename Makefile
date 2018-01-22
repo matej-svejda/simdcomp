@@ -2,26 +2,29 @@
 .SUFFIXES:
 #
 .SUFFIXES: .cpp .o .c .h
+
+# Use -march=corei7 to support SSE4.2 but not AVX: https://gcc.gnu.org/onlinedocs/gcc-4.8.4/gcc/i386-and-x86-64-Options.html
 ifeq ($(DEBUG),1)
-CFLAGS = -fPIC  -std=c89 -ggdb -march=native -Wall -Wextra -Wshadow -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
+CFLAGS = -fPIC  -std=c89 -ggdb -march=corei7 -Wall -Wextra -Wshadow -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
 else
-CFLAGS = -fPIC -std=c89 -O3  -march=native -Wall -Wextra -Wshadow
+CFLAGS = -fPIC -std=c89 -O3  -march=corei7 -Wall -Wextra -Wshadow
 endif # debug
-LDFLAGS = -shared
-LIBNAME=libsimdcomp.so.0.0.3
-all:  unit unit_chars bitpackingbenchmark $(LIBNAME)
+INSTALL_PREFIX = ./install_x86
+LIBNAME=libsimdcomp.a
+all:  $(LIBNAME)
 test:
 	./unit
 	./unit_chars
 install: $(OBJECTS)
-	cp $(LIBNAME) /usr/local/lib
-	ln -s /usr/local/lib/$(LIBNAME) /usr/local/lib/libsimdcomp.so
-	ldconfig
-	cp $(HEADERS) /usr/local/include
+	mkdir -p $(INSTALL_PREFIX)
+	mkdir -p $(INSTALL_PREFIX)/lib
+	mkdir -p $(INSTALL_PREFIX)/include
+	cp $(LIBNAME) $(INSTALL_PREFIX)/lib
+	cp $(HEADERS) $(INSTALL_PREFIX)/include
 
 
 
-HEADERS=./include/simdbitpacking.h ./include/simdcomputil.h ./include/simdintegratedbitpacking.h ./include/simdcomp.h ./include/simdfor.h ./include/avxbitpacking.h ./include/avx512bitpacking.h
+HEADERS=./include/simdbitpacking.h ./include/simdcomputil.h ./include/simdintegratedbitpacking.h ./include/simdcomp.h ./include/simdfor.h ./include/avxbitpacking.h ./include/avx512bitpacking.h ./include/portability.h
 
 uninstall:
 	for h in $(HEADERS) ; do rm  /usr/local/$$h; done
@@ -34,7 +37,7 @@ OBJECTS= simdbitpacking.o simdintegratedbitpacking.o simdcomputil.o \
 		 simdpackedsearch.o simdpackedselect.o simdfor.o avxbitpacking.o avx512bitpacking.o
 
 $(LIBNAME): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(LIBNAME) $(OBJECTS)  $(LDFLAGS)
+	$(AR) rcs $(LIBNAME) $(OBJECTS)
 
 
 avx512bitpacking.o: ./src/avx512bitpacking.c $(HEADERS)
