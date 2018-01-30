@@ -5,9 +5,9 @@
 
 # Use -march=corei7 to support SSE4.2 but not AVX: https://gcc.gnu.org/onlinedocs/gcc-4.8.4/gcc/i386-and-x86-64-Options.html
 ifeq ($(DEBUG),1)
-CFLAGS = -fPIC  -std=c89 -ggdb -march=corei7 -Wall -Wextra -Wshadow -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
+CFLAGS = -fPIC  -std=c89 -ggdb -msse2 -Wall -Wextra -Wshadow -fsanitize=undefined  -fno-omit-frame-pointer -fsanitize=address
 else
-CFLAGS = -fPIC -std=c89 -O3  -march=corei7 -Wall -Wextra -Wshadow
+CFLAGS = -fPIC -std=c89 -O3 -msse2 -Wall -Wextra -Wshadow
 endif # debug
 INSTALL_PREFIX = ./install_x86
 LIBNAME=libsimdcomp.a
